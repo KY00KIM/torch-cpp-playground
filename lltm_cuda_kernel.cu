@@ -89,10 +89,13 @@ std::vector<torch::Tensor> lltm_cuda_forward(
     torch::Tensor old_h,
     torch::Tensor old_cell) {
   auto X = torch::cat({old_h, input}, /*dim=*/1);
-  auto gates = torch::addmm(bias, X, weights.transpose(0, 1));
+  // auto gates = torch::addmm(bias, X, weights.transpose(0, 1));
 
   const auto batch_size = old_cell.size(0);
   const auto state_size = old_cell.size(1);
+
+  auto gate_weights = torch::addmm(bias, X, weights.transpose(0, 1));
+  auto gates = gate_weights.reshape({batch_size, 3, state_size});
 
   auto new_h = torch::zeros_like(old_cell);
   auto new_cell = torch::zeros_like(old_cell);

@@ -17,6 +17,11 @@ C = torch.randn(batch_size, state_size, device=cuda_device)
 
 rnn = LLTM(input_features, state_size).to(cuda_device)
 
+# new_h, new_C = rnn(X, (h, C))
+# print("model:",rnn)
+# print ("X:", X.shape, "h:", h.shape, "C:",C.shape, "new_h:", new_h.shape, "new_C:", new_C.shape)
+# assert False
+
 forward = 0
 backward = 0
 for _ in range(100000):

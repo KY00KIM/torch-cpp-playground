@@ -8,12 +8,9 @@ lltm = load(name='lltm', sources=['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'])
 class LLTMFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, weights, bias, old_h, old_cell):
-        # @@ KY00KIM : using CPP module
         # outputs = lltm_cpp.forward(input, weights, bias, old_h, old_cell)
-        
-        # @@ KY00KIM : using CUDA module
+        # print("input:",input.shape, "w:",weights.shape, "bias:",bias.shape, "old_h:",old_h.shape, "old_cell:",old_cell.shape)
         outputs = lltm.forward(input, weights, bias, old_h, old_cell)
-        
         new_h, new_cell = outputs[:2]
         variables = outputs[1:] + [weights]
         ctx.save_for_backward(*variables)
@@ -22,14 +19,12 @@ class LLTMFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_h, grad_cell):
-        # @@ KY00KIM : using CPP module
         # outputs = lltm_cpp.backward(
         #     grad_h.contiguous(), grad_cell.contiguous(), *ctx.saved_tensors)
-        
-        # @@ KY00KIM : using CUDA module
         outputs = lltm.backward(
             grad_h.contiguous(), grad_cell.contiguous(), *ctx.saved_tensors)
-        d_old_h, d_input, d_weights, d_bias, d_old_cell = outputs
+        # d_old_h, d_input, d_weights, d_bias, d_old_cell = outputs  # CPP
+        d_old_h, d_input, d_weights, d_bias, d_old_cell, _ = outputs # CUDA
         return d_input, d_weights, d_bias, d_old_h, d_old_cell
 
 
